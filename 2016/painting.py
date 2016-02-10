@@ -21,14 +21,43 @@ class Move():
         raise NotImplemented()
 
 class Square(Move):
-    def __init__(self, cell, size):
-        self.cell = cell
-        self.size = size
+    def __init__(self, center, radius):
+        # Square always has an odd edge length
+        self.center = cell
+        self.radius = radius
+
+    def draw_help(self, canvas, center, radius, directions=None):
+        if radius == 0:
+            return
+        center = np.array(center)
+        if directions is None:
+            directions = [
+                np.array([-1, -1]), np.array([-1, 0]), np.array([-1, 1]),
+                np.array([0, 1]), np.array([1, 1]), np.array([1, 0]),
+                np.array([1, -1]), np.array([0, -1])
+            ]
+
+        for direction in directions:
+            current = center + direction
+            canvas[current] = True
+            # Check if diagonal, those have to paint most
+            if not np.any(direction == 0):
+                next_directions = [
+                    direction, np.array([0, direction[1]]), np.array([direction[0], 0])
+                ]
+            else:
+                next_directions = [direction]
+            draw_help(canvas, current, radius-1, next_directions)
+
+
+    def draw(self, canvas):
+        canvas[self.center] = True
+        draw_help(canvas, self.center, self.radius)
+
 
 class Line(Move):
     def __init__(self, start, to):
-        # TODO remove
-        assert(start[0] == to[0] or start[1] == to[1])
+        # assert(start[0] == to[0] or start[1] == to[1])
         self.start = start
         self.to = to
         
@@ -49,6 +78,9 @@ class Line(Move):
 class Erase(Move):
     def __init__(self, cell):
         self.cell = cell
+
+    def draw(self, canvas):
+        canvas[self.cell] = False
 
 class State():
     def __init__(self, canvas=None):
@@ -82,9 +114,9 @@ class State():
             s += '\n'
         return s
 
-    # Heuristically and optimistically (so it's admissible) estimate the cost
-    # from current state to goal
     def heuristic(self, goal):
+        # Heuristically and optimistically (so it's admissible) estimate the cost
+        # from current state to goal
         inf = float('inf')
         min_r, min_c = (inf, inf)
         max_r, max_c = (-inf, -inf)
@@ -121,9 +153,10 @@ class State():
         # underestimate underestimate underestimate
         return min(min_lines, square_scenario)
 
-    # self is the toughest one, heuristically create neighbor states
     def neighbors(self, goal):
-        # First, attempt to find some lines you could draw
+        # 1. Try drawing the longest lines you can
+        # 2. Try drawing some squares, taking into account there can be holes
+        # 3. Try erasing cells that shouldn't be painted
         diff = goal.canvas - self.canvas
         negative = diff & self.canvas   # True where should be erased
         positive = diff & goal.canvas   # True where should be painted
@@ -152,9 +185,7 @@ class State():
                     current_start = None
                     current_length = 0
 
-        current_start = None
-        current_length = 0
-
+        # Find vertical lines
         for c in range(n_cols):
             for r in range(n_rows+1):
                 if r < n_rows and positive[r, c]:
@@ -172,11 +203,24 @@ class State():
                     current_start = None
                     current_length = 0
 
-        # Start yielding all neighbors resulting out of drawing a line
-        for line in lines:
+        # Find cells to erase
+        erases = []
+        rs, cs = np.where(negative == True)
+        for i in range(rs.length):
+            r, c = (rs[i], cs[i])
+            erases.append(Erase(r, c))
+
+        squares = []
+        # TODO squares
+
+        # Keep erases for last
+        moves = lines + squares + erases
+
+        # Yield all neighbors along with the moves that generated them
+        for move in moves:
             neighbor = self.copy()
-            line.draw(neighbor.canvas)
-            yield neighbor, line
+            move.draw(neighbor.canvas)
+            yield neighbor, move
 
 
 class PrioritySet():
