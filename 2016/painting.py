@@ -270,6 +270,7 @@ if __name__ == '__main__':
         canvas[i, ...] = map(lambda c: True if c == '#' else False, line)
 
     result = run_algo(canvas)
+    print len(result)
     for line in result:
         print line
 
