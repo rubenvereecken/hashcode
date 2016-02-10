@@ -35,20 +35,16 @@ class Erase(Move):
 
 class State():
     # A crude way to make states hashable and referrable
-    all_states = []
+    all_states = {}
     n_states = 0
 
     def __init__(self, canvas=None):
-        self.id = n_states
         self.canvas = canvas or np.zeros()
-        n_states += 1
-        all_states.append(self)
+        State.register(self)
 
     def copy(self):
         other = copy.deepcopy(self)
-        other.id = n_states
-        n_states += 1
-        all_states.append(other)
+        State.register(other)
         return other
 
     def __eq__(self, other):
@@ -64,7 +60,25 @@ class State():
     def get(cls, id):
         return State.all_states[id]
 
+    @classmethod
+    def register(cls, state):
+        state.id = cls.n_states
+        cls.all_states[cls.n_states] = state
+        cls.n_states += 1
+
+    @classmethod
+    def remove(cls, state):
+        if isinstance(state, cls):
+            state = state.id
+        del all_states[state]
+
+    # This is the toughest one, heuristically create neighbor states
     def neighbors(self):
+        pass
+
+    # Heuristically and optimistically (so it's admissible) estimate the cost
+    # from current state to goal
+    def heuristic(self):
         pass
 
 class PrioritySet():
@@ -74,9 +88,15 @@ class PrioritySet():
 
     def put(self, item, priority):
         this.q.put((priority, item))
-        this.
+        this.set.add(item)
 
-        
+    def get(self):
+        item = this.q.get_nowait()[1]
+        this.set.remove(item)
+        return item
+
+    def __contains__(self, item):
+        return item in this.set
 
 
 def run_algo(canvas):
@@ -85,14 +105,14 @@ def run_algo(canvas):
     """
     start = State() # empty canvas
     goal = State(canvas)
-    open_pq = PriorityQueue()
-    open_pq.put((0, start))
+    open_set = PriorityQueue()
+    open_set.put(start, 0)
 
     g = {start.id: 0}
     f = heuristic(start)
 
-    while not open_pq.empty():
-        current = open_pq.get_nowait()[0]
+    while not open_set.empty():
+        current = open_set.get()
         if current == goal:
             return "whoop"
 
