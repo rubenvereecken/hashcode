@@ -82,7 +82,7 @@ class Order:
         return self.jobs.pop()
 
     def has_jobs_left(self):
-        return leb(self.job) > 0
+        return len(self.job) > 0
 
     def empty(self):
         return len(self.items) == 0 or np.all(np.array(self.items.values()) == 0)
