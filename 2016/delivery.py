@@ -96,7 +96,7 @@ class Drone:
         min_dist = 10000000
         min_order = None
         for order in orders:
-            dist = sqrt(self.location, order.location) #TODO
+            dist = numpy.linalg.norm(numpy.array(self.location) - numpy.array(order.location))
             if dist < min_dist:
                 min_order = order
                 min_dist = dist
@@ -112,10 +112,9 @@ class Drone:
             if warehouse.products[item_key] > 0:
                 target_warehouse = warehouse
                 warehouse.products[item_key] -= 1
-                total_commands += 2
-                drones.commands.push("{0} L {1} {2} {3}".format(drone.id,warehouse.id,product_type,1))
-                drones.commands.push("{0} D {1} {2} {3}".format(drone.id,min_order.id,product_type,1)
-                self.turnsLeft = numpy.linalg.norm(numpy.array(drone.location) - numpy.array(warehouse.location)) + numpy.linalg.norm(numpy.array(warehouse.location) - numpy.array(min_order.location)) + 2
+                drones.actions.push("{0} L {1} {2} {3}".format(drone.id,warehouse.id,product_type,1))
+                drones.actions.push("{0} D {1} {2} {3}".format(drone.id,min_order.id,product_type,1)
+                self.turnsLeft = math.ceil(numpy.linalg.norm(numpy.array(self.location) - numpy.array(warehouse.location)) + math.ceil(numpy.linalg.norm(numpy.array(warehouse.location) - numpy.array(min_order.location))) + 2
                 break
 
 
