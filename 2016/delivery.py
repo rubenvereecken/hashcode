@@ -115,6 +115,8 @@ class Drone:
         min_dist = 10000000
         min_order = None
         for order in orders:
+            if len(order.items.keys()) == 0:
+                continue
             dist = euclid(self.location, order.location) #TODO
             if dist < min_dist:
                 min_order = order
