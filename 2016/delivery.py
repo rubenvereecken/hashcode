@@ -140,7 +140,8 @@ class Drone(object):
                 self.commands.append("{0} D {1} {2} {3}".format(self.id,min_order.id,item_key,1))
 
                 self.turnsLeft = euclid(self.location, warehouse.location) + euclid(warehouse.location, min_order.location) + 2
-                order.finalTurn = max(order.finalTurn, self.turnsLeft + turn)
+                min_order.finalTurn = max(order.finalTurn, self.turnsLeft + turn)
+                print(min_order.finalTurn)
                 break
 
 
@@ -162,10 +163,13 @@ def main():
             if not order.done:
                 break
             break
-    print(turn)
+
     score = 0
     for order in orders:
-        score += (n_turns - order.finalTurn)/n_turns
+        #print(order.finalTurn)
+        if (order.finalTurn != -1):
+            score += (n_turns - order.finalTurn)/n_turns
+
     print(score*100)
 
     # output
