@@ -87,7 +87,7 @@ class Drone:
     def __init__(self):
         self.location = warehouses[0].location
         self.turnsLeft = 0
-        self.actions = [] #lijst van strings
+        self.commands = [] #lijst van strings
         self.payload = {
 
         }
