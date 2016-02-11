@@ -15,6 +15,7 @@ warehouses = []
 orders = []
 drones = []
 n_warehouses, n_orders = (None, None)
+total_commands = 0
 
 class Warehouse:
     def __init__(self, location, products, _id):
@@ -97,14 +98,8 @@ def determine_warehouse_order():
     for order in orders:
         pass
 
-drones = []
 
-for _ in range(n_drones):
-    drones.append(Drone());
-
-total_commands = 0
-
-class Drone:
+class Drone(object):
     def __init__(self,_id):
         self.location = warehouses[0].location
         self.turnsLeft = 0
@@ -119,6 +114,8 @@ class Drone:
         min_dist = 10000000
         min_order = None
         for order in orders:
+            if len(order.items.keys()) == 0:
+                continue
             dist = euclid(self.location, order.location) #TODO
             if dist < min_dist:
                 min_order = order
@@ -137,6 +134,7 @@ class Drone:
                 target_warehouse = warehouse
                 warehouse.products[item_key] -= 1
 
+                global total_commands
                 total_commands += 2
                 self.commands.append("{0} L {1} {2} {3}".format(self.id,warehouse.id,item_key,1))
                 self.commands.append("{0} D {1} {2} {3}".format(self.id,min_order.id,item_key,1))
@@ -146,14 +144,14 @@ class Drone:
 
 
     def performTurn(self):
-        print("performTurn")
         if self.turnsLeft == 0:
             self.calculateNewAction()
 
         self.turnsLeft - 1;
 
 for i in range(n_drones):
-    drones.append(Drone(i))
+    drones.append(Drone(i));
+
 
 def main():
     for a in range(n_turns):
@@ -162,7 +160,7 @@ def main():
     # output
     print(total_commands)
     for drone in drones:
-        print(drone.commands.join("\n"));
+        "\n".join(drone.commands)
 
 
 main()
