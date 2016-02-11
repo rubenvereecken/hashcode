@@ -76,16 +76,25 @@ for warehouse in warehouses: print warehouse
 for order in orders: print order
 
 
-drones = [];
+begin_locatie = 
+
+for a in range(n_drones):
+    drones.push(Drone());
 
 class Drone:
     def __init__(self):
-        self.pos = (0,0);
+        self.pos = warehouses[0].location
         self.turnsLeft = 0
-        self.action = "" #LOAD...
-        self.payloads = []
+        self.action = None # "L" "D"
+        self.payload = {
+            
+        }
 
-    def perform
+    def performAction():
+        pass
+
+    def calculateNewAction():
+        pass
 
     def performTurn():
         if self.turnsLeft = 0:
@@ -95,6 +104,6 @@ class Drone:
         self.turnsLeft - 1;
 
 def main():
-    for a in range(turns):
+    for a in range(n_turns):
         for drone in drones:
             drone.performTurn()
