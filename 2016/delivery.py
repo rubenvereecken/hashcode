@@ -109,10 +109,12 @@ class Drone:
         }
 
     def calculateNewAction():
+
+
         min_dist = 10000000
         min_order = None
         for order in orders:
-            dist = sqrt(self.location, order.location) #TODO
+            dist = euclid(self.location, order.location) #TODO
             if dist < min_dist:
                 min_order = order
                 min_dist = dist
@@ -131,7 +133,7 @@ class Drone:
                 total_commands += 2
                 drones.commands.push("{0} L {1} {2} {3}".format(drone.id,warehouse.id,product_type,1))
                 drones.commands.push("{0} D {1} {2} {3}".format(drone.id,min_order.id,product_type,1)
-                self.turnsLeft = numpy.linalg.norm(numpy.array(drone.location) - numpy.array(warehouse.location)) + numpy.linalg.norm(numpy.array(warehouse.location) - numpy.array(min_order.location)) + 2
+                self.turnsLeft = euclid(drone.location, warehouse.location) + 2
                 break
 
 
