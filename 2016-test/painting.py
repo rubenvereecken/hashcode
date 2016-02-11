@@ -297,7 +297,8 @@ class State():
 
         # Keep erases for last
         moves = squares + lines + erases
-        print len(moves), 'moves', len(lines), 'lines (size %i)' % max_length, len(squares), 'squares (size %i)' % max_fresh, len(erases), 'erases'
+        # print len(moves), 'moves', len(lines), 'lines (size %i)' % max_length, len(squares), 'squares (size %i)' % max_fresh, len(erases), 'erases'
+        print self
 
         # Yield all neighbors along with the moves that generated them
         for move in moves:
