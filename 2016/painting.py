@@ -2,6 +2,7 @@ import copy
 import numpy as np
 from enum import Enum
 from Queue import PriorityQueue
+import time
 
 def read_ints():
     return map(int, raw_input().split(' '))
@@ -106,7 +107,7 @@ class State():
         return np.all(self.canvas == other.canvas)
 
     def __lt__(self, other):
-        raise Exception()
+        return self.__hash__() < other.__hash__()
 
     def __hash__(self):
         # Improvised 
@@ -175,8 +176,6 @@ class State():
             # go with the smaller one
             for r in range(topleft[0], bottomright[0]+3):
                 for c in range(bottomright[1]+1, bottomright[1]+3):
-                    if c == 800:
-                        print topleft, bottomright, margin, step
                     should_paint = positive[r,c]
                     already_painted = canvas[r,c]
                     if not (should_paint or already_painted):
@@ -202,7 +201,8 @@ class State():
         radius = (bottomright - topleft) / 2
         center = topleft + radius
         radius = radius[0]
-        return Square(center, radius), last_fresh
+        return Square(center, radius), last_fresh, holes
+
 
     def neighbors(self, goal):
         # 2. Try drawing the longest lines you can
@@ -215,75 +215,89 @@ class State():
         squares = []
         # max_radius = -1
         max_fresh = 1 # Have at least one newly painted cell
-        for r in range(n_rows):
+        max_radius = 1
+        b = time.time()
+        
+        r, c= (0, 0)
+        for r in range(n_rows): # The +1 is so we can finish a row
             for c in range(n_cols):
                 # TODO little heuristic, might have to remove
                 # If it's already in a known square, don't recheck
-                # if np.any(map(lambda square: (r,c) in square, squares)):
-                #     continue
-                square, fresh = self.find_square_at((r, c), self.canvas, positive)
-                if fresh > max_fresh:
-                    max_fresh = fresh
-                    squares = [square]
-                elif fresh == max_fresh:
+                square, fresh, holes = self.find_square_at((r, c), self.canvas, positive)
+                if holes < fresh and fresh >= max_fresh and square.radius >= max_radius:
+                    if fresh > max_fresh:
+                        max_fresh = fresh
+                        squares = []
                     squares.append(square)
 
-        # Let's be lazy and only find lines more than 1 cell long
-        # single cells can be covered by squares
-        max_length = 2
+        max_length = 1
         lines = []
         current_start = None
         current_length = 0
 
-
         # Find horizontal lines. Keep only the longest
         # Don't care about lines with gaps
         for r in range(n_rows): # The +1 is so we can finish a row
-            for c in range(n_cols + 1):
+            for c in range(n_cols):
                 # TODO add a rule for drawing over existing
-                if c < n_cols and positive[r, c]:
+                if positive[r, c]:
                     if current_start is None:
                         current_start = (r, c)
                     current_length += 1
-                elif current_length >= max_length:
-                    if current_length > max_length:
-                        max_length = current_length
-                        lines = []
-                    lines.append(Line(current_start, (r, c-1)))
+                else:
+                    if current_length >= max_length:
+                        if current_length > max_length:
+                            max_length = current_length
+                            lines = []
+                        lines.append(Line(current_start, (r, c-1)))
                     current_start = None
                     current_length = 0
-                if c >= n_cols:
-                    current_start = None
-                    current_length = 0
+            if current_length >= max_length:
+                if current_length > max_length:
+                    max_length = current_length
+                    lines = []
+                lines.append(Line(current_start, (r, n_cols-1)))
+            current_start = None
+            current_length = 0
 
-        # Find vertical lines
         for c in range(n_cols):
-            for r in range(n_rows+1):
-                if r < n_rows and positive[r, c]:
+            for r in range(n_rows): # The +1 is so we can finish a row
+                if positive[r, c]:
                     if current_start is None:
                         current_start = (r, c)
                     current_length += 1
-                elif current_length >= max_length:
-                    if current_length > max_length:
-                        max_length = current_length
-                        lines = []
-                    lines.append(Line(current_start, (r-1, c)))
+                else:
+                    if current_length >= max_length:
+                        if current_length > max_length:
+                            max_length = current_length
+                            lines = []
+                        lines.append(Line(current_start, (r-1, c)))
                     current_start = None
                     current_length = 0
-                if r >= n_rows:
-                    current_start = None
-                    current_length = 0
+            if current_length >= max_length:
+                if current_length > max_length:
+                    max_length = current_length
+                    lines = []
+                lines.append(Line(current_start, (n_rows-1, c)))
+            current_start = None
+            current_length = 0
 
         # Find cells to erase
         erases = []
-        rs, cs = np.where(negative == True)
+        if len(squares) + len(lines) == 0:
+            rs, cs = np.where(negative == True)
 
-        for i in range(rs.size):
-            r, c = (rs[i], cs[i])
-            erases.append(Erase((r, c)))
+            for i in range(rs.size):
+                r, c = (rs[i], cs[i])
+                erases.append(Erase((r, c)))
+
+        erases = erases[:1]
+        lines = lines[:1]
+        squares = squares[:1]
 
         # Keep erases for last
-        moves = lines + squares + erases
+        moves = squares + lines + erases
+        print len(moves), 'moves', len(lines), 'lines (size %i)' % max_length, len(squares), 'squares (size %i)' % max_fresh, len(erases), 'erases'
 
         # Yield all neighbors along with the moves that generated them
         for move in moves:
@@ -292,33 +306,29 @@ class State():
             yield neighbor, move
 
 
+from priority_queue import priority_dict
 class PrioritySet():
-    def __init__(self, sort_key):
+    def __init__(self):
         # Need a pqueue with the ability to change priorities of items in the q
-        # self.q = PriorityQueue()
-        self.q = []
-        self.set = set([])
-        self.sort_key = sort_key
+        self.q = priority_dict()
 
-    def put(self, item):
-        # self.q.put((priority, item))
-        self.q.append(item)
-        self.set.add(item)
+    def put(self, item, priority):
+        self.q[item] = priority
+
+    def update(self, item, priority):
+        self.put(item, priority)
 
     def get(self):
-        # item = self.q.get_nowait()[]
-        # This last minute sort is needed because items can have priorities
-        # changed
-        self.q.sort(key=self.sort_key) # Apply key to state
-        item = self.q.pop(0)
-        self.set.remove(item)
+        # b = time.time()
+        item = self.q.pop_smallest()
+        # print str(time.time() - b)
         return item
 
     def empty(self):
-        return len(self.set) == 0
+        return len(self.q) == 0
 
     def __contains__(self, item):
-        return item in self.set
+        return item in self.q
 
 def reconstruct_history(history, move_history, current):
     path = []
@@ -328,6 +338,7 @@ def reconstruct_history(history, move_history, current):
         return []
     else:
         return reconstruct_history(history, move_history, previous) + [previous_move]
+
 
 def run_algo(canvas):
     """
@@ -343,16 +354,21 @@ def run_algo(canvas):
     f = {}
     f[start] = start.heuristic(goal)
 
-    open_set = PrioritySet(lambda x: f[x])
-    open_set.put(start) # highest priority
+    closed_set = {}
+    open_set = PrioritySet()
+    open_set.put(start, 0) # highest priority
 
     while not open_set.empty():
         current = open_set.get()
         if current == goal:
             yield reconstruct_history(history, move_history, current)
 
+        closed_set[current] = True
         current_g = g[current]
         for neighbor, move in current.neighbors(goal):
+            # The heuristic is designed to be consistent so this is allowed
+            if neighbor in closed_set:
+                continue
             # The distance to a neighbor is always +1: a single move
             neighbor_g = current_g + 1
             
@@ -360,14 +376,16 @@ def run_algo(canvas):
             # better ones
             if neighbor_g >= g.get(neighbor, float('inf')):
                 continue    # Worse than previously known 
-            if not neighbor in open_set:
-                open_set.put(neighbor) # New route, add it
-                
             # Remember the best move and previous state to get here
             history[neighbor] = current
             move_history[neighbor] = move
             g[neighbor] = neighbor_g
             f[neighbor] = g[neighbor] + neighbor.heuristic(goal)
+
+            if not neighbor in open_set:
+                open_set.put(neighbor, f[neighbor]) # New route, add it
+            else:
+                open_set.update(neighbor, f[neighbor])
 
 
 
@@ -380,10 +398,14 @@ if __name__ == '__main__':
         line = raw_input()
         canvas[i, ...] = map(lambda c: True if c == '#' else False, line)
 
+    n_file = 0
     # Program never stops, just keeps running trying to find improvements
     results = run_algo(canvas)
     for result in results:
-        print len(result)
-        for line in result:
-            print line
+        with open('{}.out'.format(n_file), 'wb') as f:
+            print len(result)
+            f.write(str(len(result)) + '\n')
+            for line in result:
+                print line
+                f.write(str(line) + '\n')
 
