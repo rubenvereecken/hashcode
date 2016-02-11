@@ -26,8 +26,8 @@ class Warehouse:
         s += 'location {}, contains {} products\n'.format(self.location, len(self.products))
         s += str(self.products) + '\n'
         return s
-            
-        
+
+
 class Order:
     def __init__(self, location, items):
         # python tuple r, c
@@ -71,7 +71,7 @@ for i in xrange(n_orders):
     order = Order(location, items)
     orders.append(order)
 
-# DOE DEES WEG 
+# DOE DEES WEG
 for warehouse in warehouses: print warehouse
 for order in orders: print order
 
@@ -83,13 +83,10 @@ class Drone:
     def __init__(self):
         self.location = warehouses[0].location
         self.turnsLeft = 0
-        self.action = None # "L" "D"
+        self.actions = [] #lijst van strings
         self.payload = {
 
         }
-
-    def performAction():
-        pass
 
     def calculateNewAction():
         min_dist = 10000000
@@ -100,27 +97,27 @@ class Drone:
                 min_order = order
                 min_dist = dist
 
-        item_key = order.items.keys[0]
-        order.items[item_key] -= 1
-        if order.items[item_key] <= 0:
-            order.items.remove(item_key)
+        item_key = min_order.items.keys[0]
+        min_order.items[item_key] -= 1
+        if min_order.items[item_key] <= 0:
+            min_order.items.remove(item_key)
 
         target_warehouse = None
 
         for warehouse in warehouses:
             if warehouse.products[item_key] > 0:
                 target_warehouse = warehouse
-                break
+                warehouse.products[item_key] -= 1
 
-        self.action = load target warehouse
-        self.next action = deliver order.location
+                drones.actions.push("{0} L {1} {2} {3}".format(drone.id,warehouse.id,product_type,1))
+                drones.actions.push("{0} D {1} {2} {3}".format(drone.id,min_order.id,product_type,1)
+                self.turnsLeft = numpy.linalg.norm(numpy.array(drone.location) - numpy.array(warehouse.location)) + numpy.linalg.norm(numpy.array(warehouse.location) - numpy.array(min_order.location)) + 2
+                break
 
 
     def performTurn():
         if self.turnsLeft = 0:
-            performAction()
             calculateNewAction()
-
         self.turnsLeft - 1;
 
 def main():
