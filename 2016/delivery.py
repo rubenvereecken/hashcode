@@ -42,7 +42,7 @@ class Order:
         self.id = _id
 
     def total_weight(self):
-        return sum(map(lambda (product, amount): amount * product_types[product], self.items.iteritems()))
+        return sum(map(lambda product, amount : amount * product_types[product], self.items.iteritems()))
 
     def __str__(self):
         s = ''
@@ -78,8 +78,8 @@ for i in xrange(n_orders):
     orders.append(order)
 
 # TODO DOE DEES WEG
-for warehouse in warehouses: print warehouse
-for order in orders: print order
+for warehouse in warehouses: print(warehouse)
+for order in orders: print(order)
 
 def euclid(a, b):
     if isinstance(a, tuple):
@@ -97,6 +97,11 @@ def determine_warehouse_order():
     for order in orders:
         pass
 
+drones = []
+
+for _ in range(n_drones):
+    drones.append(Drone());
+
 total_commands = 0
 
 class Drone:
@@ -110,7 +115,6 @@ class Drone:
         }
 
     def calculateNewAction(self):
-
 
         min_dist = 10000000
         min_order = None
@@ -135,8 +139,10 @@ class Drone:
                 target_warehouse = warehouse
                 warehouse.products[item_key] -= 1
 
+                total_commands += 2
                 self.commands.append("{0} L {1} {2} {3}".format(self.id,warehouse.id,item_key,1))
                 self.commands.append("{0} D {1} {2} {3}".format(self.id,min_order.id,item_key,1))
+
                 self.turnsLeft = euclid(self.location, warehouse.location) + euclid(warehouse.location, min_order.location) + 2
                 break
 
@@ -145,6 +151,7 @@ class Drone:
         print("performTurn")
         if self.turnsLeft == 0:
             self.calculateNewAction()
+
         self.turnsLeft - 1;
 
 for i in range(n_drones):
