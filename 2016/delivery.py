@@ -56,7 +56,7 @@ orders = []
 n_warehouses = int(raw_input())
 for i in xrange(n_warehouses):
     location = tuple(read_ints())
-    products = {}
+    products = defaultdict(int)
     product_amounts = read_ints()
     for i, amount in enumerate(product_amounts):
         products[i] = amount
@@ -129,3 +129,23 @@ def main():
     for a in range(n_turns):
         for drone in drones:
             drone.performTurn()
+
+def euclid(a, b):
+    if isinstance(a, tuple):
+        a = np.array(a)
+    if isinstance(b, tuple):
+        b = np.array(b)
+    return np.linalg.norm(b-a)
+
+def determine_warehouse_order():
+    # assume global
+    drone_location = warehouses[0].location
+    warehouses_to_drones = np.array(map(lambda warehouse: euclid(warehouse.location, drone_location)), warehouses)
+
+    # orders_by_weight = orders.sort(key=lambda order: )
+    for order in orders:
+
+
+
+
+
