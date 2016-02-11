@@ -82,7 +82,7 @@ class Order:
         return self.jobs.pop()
 
     def has_jobs_left(self):
-        return leb(self.job) > 0
+        return len(self.jobs) > 0
 
     def empty(self):
         return len(self.items) == 0 or np.all(np.array(self.items.values()) == 0)
@@ -191,6 +191,9 @@ class Drone(object):
     def calculateNewAction(self):
         global total_commands
         job = get_job()
+
+        if job is None:
+            return
         
         for product, amount in job.products.iteritems():
             total_commands += 1
@@ -201,8 +204,6 @@ class Drone(object):
             self.commands.append("{0} D {1} {2} {3}".format(self.id, job.deliver_at, product, amount))
 
 
-        self.turnsLeft = euclid(self.location, warehouse.location) + euclid(warehouse.location, min_order.location) + 2
-        break
 
 
     def performTurn(self):
