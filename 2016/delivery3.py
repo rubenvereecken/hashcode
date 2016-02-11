@@ -73,7 +73,6 @@ class Order:
                 if taking > 0:
                     job.products[product] = taking
                     job.left -= taking * product_types[product]
-            # print partial
             assert (job.left != job.capacity)
             # if job.left != job.capacity:
             jobs.append(job)
@@ -124,10 +123,6 @@ for i in xrange(n_orders):
     order = Order(location, items, i)
     orders.append(order)
 
-# TODO DOE DEES WEG
-for warehouse in warehouses: print(warehouse)
-for order in orders: print(order)
-
 
 def euclid(a, b):
     if isinstance(a, tuple):
@@ -139,7 +134,6 @@ def euclid(a, b):
 def determine_orders():
     # assume global
     drone_location = warehouses[0].location
-    # robbed_warehouses = copy.deepcopy(warehouses)
     warehouses_to_drones = np.array(map(lambda warehouse: euclid(warehouse.location, drone_location), warehouses))
     orders_by_weight = sorted(orders, key=lambda order: order.total_weight())
     weighted_orders = [None for _ in xrange(len(orders_by_weight))]
@@ -178,6 +172,7 @@ def get_job():
     # current = next(map(lambda order: order.has_jobs_left()))
     current = orders[0]
     if not current.has_jobs_left():
+        orders.pop(0)
         return get_job()
     return current.take_job()
 
