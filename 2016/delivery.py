@@ -141,7 +141,6 @@ class Drone(object):
 
                 self.turnsLeft = euclid(self.location, warehouse.location) + euclid(warehouse.location, min_order.location) + 2
                 min_order.finalTurn = max(order.finalTurn, self.turnsLeft + turn)
-                print(min_order.finalTurn)
                 break
 
 
@@ -170,6 +169,7 @@ def main():
         if (order.finalTurn != -1):
             score += (n_turns - order.finalTurn)/n_turns
 
+    print("score:")
     print(score*100)
 
     # output
