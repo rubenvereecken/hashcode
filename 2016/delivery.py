@@ -38,6 +38,9 @@ class Order:
         # To get a key-value iterator: for k, v in self.items.iteritems()
         self.items = items
 
+    def total_weight(self):
+        return sum(map(lambda (product, amount): amount * product_types[product], self.items.iteritems()))
+
     def __str__(self):
         s = ''
         s += 'order for {}, contains {} product types, total of {} products'.format(self.location, len(self.items.keys()), sum(self.items.values()))
@@ -73,4 +76,10 @@ for i in xrange(n_orders):
 
 # DOE DEES WEG 
 for warehouse in warehouses: print warehouse
-for order in orders: print order
+for order in orders:
+    print order
+    print order.total_weight()
+
+
+# def determine_warehouse_order(warehouses):
+
