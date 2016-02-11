@@ -80,10 +80,6 @@ for i in xrange(n_orders):
     order = Order(location, items, i)
     orders.append(order)
 
-# TODO DOE DEES WEG
-for warehouse in warehouses: print(warehouse)
-for order in orders: print(order)
-
 def euclid(a, b):
     if isinstance(a, tuple):
         a = np.array(a)
@@ -166,7 +162,7 @@ def main():
             if not order.done:
                 break
             break
-    print(turn)
+    print(turn) #TODO REMOVE
 
     # output
     print(total_commands)
