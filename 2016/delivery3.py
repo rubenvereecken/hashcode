@@ -65,21 +65,17 @@ class Order:
 
     def create_jobs(self, warehouse, partial):
         jobs = []
-        print partial
         while not partial.empty():
             job = Job(warehouse, self.location)
             for product, amount_wanted in partial.items.iteritems():
-                warehouse_has = warehouse.products[product]
-                taking = min(warehouse_has, amount_wanted)
-                taking = min(taking, job.left // product_types[product])
+                taking = min(amount_wanted, job.left // product_types[product])
                 partial.items[product] -= taking
                 if taking > 0:
                     job.products[product] = taking
                     job.left -= taking * product_types[product]
-            # print partial
             assert (job.left != job.capacity)
-            if jobs.left != job.capacity:
-                jobs.append(job)
+            # if job.left != job.capacity:
+            jobs.append(job)
         self.jobs += jobs
 
     def take_job(self):
@@ -89,7 +85,7 @@ class Order:
         return leb(self.job) > 0
 
     def empty(self):
-        return len(self.items) == 0 or np.all(self.items.values() == 0)
+        return len(self.items) == 0 or np.all(np.array(self.items.values()) == 0)
 
     def total_weight(self):
         return sum(map(lambda (product, amount) : amount * product_types[product], self.items.iteritems()))
@@ -127,10 +123,6 @@ for i in xrange(n_orders):
     order = Order(location, items, i)
     orders.append(order)
 
-# TODO DOE DEES WEG
-for warehouse in warehouses: print(warehouse)
-for order in orders: print(order)
-
 
 def euclid(a, b):
     if isinstance(a, tuple):
@@ -142,16 +134,17 @@ def euclid(a, b):
 def determine_orders():
     # assume global
     drone_location = warehouses[0].location
-    # robbed_warehouses = copy.deepcopy(warehouses)
     warehouses_to_drones = np.array(map(lambda warehouse: euclid(warehouse.location, drone_location), warehouses))
     orders_by_weight = sorted(orders, key=lambda order: order.total_weight())
     weighted_orders = [None for _ in xrange(len(orders_by_weight))]
+    broken_warehouses = copy.deepcopy(warehouses)
+
 
     for order_idx, order in enumerate(orders_by_weight):
         # sorted by warehouse to order PLUS warehouse to drone start
-        warehouses.sort(key=lambda warehouse: euclid(warehouse.location, order.location) + euclid(warehouse.location, drone_location))
+        broken_warehouses.sort(key=lambda warehouse: euclid(warehouse.location, order.location) + euclid(warehouse.location, drone_location))
         min_travel = 0
-        for warehouse_idx, warehouse in enumerate(warehouses):
+        for warehouse_idx, warehouse in enumerate(broken_warehouses):
             if order.empty(): break
             partial = {}
             for product, amount_wanted in order.items.iteritems():
@@ -179,6 +172,7 @@ def get_job():
     # current = next(map(lambda order: order.has_jobs_left()))
     current = orders[0]
     if not current.has_jobs_left():
+        orders.pop(0)
         return get_job()
     return current.take_job()
 
