@@ -157,7 +157,7 @@ def determine_orders():
                 warehouse.products[product] -= taking
                 if taking > 0:
                     partial[product] = taking
-                    min_travel += euclid(warehouse.location, order.location) + warehouses_to_drones[warehouse_idx]
+                    min_travel += (euclid(warehouse.location, order.location) + warehouses_to_drones[warehouse_idx]) * order.total_weight()
             partial_order = Order()
             partial_order.items = partial
             order.create_jobs(warehouse, partial_order)
@@ -165,13 +165,11 @@ def determine_orders():
         weighted_orders[order_idx] = (min_travel, order)
 
     weighted_orders.sort()
+    print weighted_orders
     return list(map(lambda x: x[1], weighted_orders))
-
-orders = determine_orders()
 
 # CALL THIS YE DRONES
 def get_job():
-    print 'HALLO'
     print orders
     if len(orders) == 0:
         return None
