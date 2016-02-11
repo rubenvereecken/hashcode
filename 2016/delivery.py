@@ -41,6 +41,8 @@ class Order:
         # To get a key-value iterator: for k, v in self.items.iteritems()
         self.items = items
         self.id = _id
+        self.done = False
+        self.finalTurn = -1
 
     def total_weight(self):
         return sum(map(lambda product, amount : amount * product_types[product], self.items.iteritems()))
@@ -109,13 +111,13 @@ class Drone(object):
 
         }
 
-    def calculateNewAction(self):
+    def calculateNewAction(self,turn):
         global total_commands
 
         min_dist = 10000000
         min_order = None
         for order in orders:
-            if len(order.items.keys()) == 0:
+            if order.done:
                 continue
             dist = euclid(self.location, order.location) #TODO
             if dist < min_dist:
@@ -127,6 +129,8 @@ class Drone(object):
         min_order.items[item_key] -= 1
         if min_order.items[item_key] <= 0:
             del min_order.items[item_key]
+        if len(min_order.items.keys()) == 0:
+            min_order.done = True
 
         target_warehouse = None
 
@@ -140,12 +144,13 @@ class Drone(object):
                 self.commands.append("{0} D {1} {2} {3}".format(self.id,min_order.id,item_key,1))
 
                 self.turnsLeft = euclid(self.location, warehouse.location) + euclid(warehouse.location, min_order.location) + 2
+
                 break
 
 
-    def performTurn(self):
+    def performTurn(self,turn):
         if self.turnsLeft == 0:
-            self.calculateNewAction()
+            self.calculateNewAction(turn)
 
         self.turnsLeft - 1;
 
@@ -154,9 +159,15 @@ for i in range(n_drones):
 
 
 def main():
-    for a in range(n_turns):
+    for turn in range(n_turns):
         for drone in drones:
-            drone.performTurn()
+            drone.performTurn(turn)
+        for order in orders:
+            if not order.done:
+                break
+            break
+    print(turn)
+
     # output
     print(total_commands)
     for drone in drones:
