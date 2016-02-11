@@ -110,6 +110,7 @@ class Drone(object):
         }
 
     def calculateNewAction(self):
+        global total_commands
 
         min_dist = 10000000
         min_order = None
@@ -134,7 +135,6 @@ class Drone(object):
                 target_warehouse = warehouse
                 warehouse.products[item_key] -= 1
 
-                global total_commands
                 total_commands += 2
                 self.commands.append("{0} L {1} {2} {3}".format(self.id,warehouse.id,item_key,1))
                 self.commands.append("{0} D {1} {2} {3}".format(self.id,min_order.id,item_key,1))
@@ -160,7 +160,7 @@ def main():
     # output
     print(total_commands)
     for drone in drones:
-        "\n".join(drone.commands)
+        print("\n".join(drone.commands))
 
 
 main()
