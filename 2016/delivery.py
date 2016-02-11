@@ -78,8 +78,7 @@ for i in xrange(n_orders):
 for warehouse in warehouses: print warehouse
 for order in orders: print order
 
-
-for a in range(n_drones):
+for _ in range(n_drones):
     drones.push(Drone());
 
 class Drone:
@@ -130,4 +129,3 @@ def main():
     for a in range(n_turns):
         for drone in drones:
             drone.performTurn()
->>>>>>> f6d82aa1161c12e0d6e6d49a5baa7666c2205204
