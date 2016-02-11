@@ -190,19 +190,15 @@ class Drone(object):
     def calculateNewAction(self):
         global total_commands
         job = get_job()
-
-# class Job:
-#     def __init__(self, warehouse, deliver_at):
-#         self.warehouse = warehouse
-#         self.products = {}
-#         self.deliver_at = deliver_at
-#         self.capacity = max_payload
-#         self.left = self.capacity
-
         
-        total_commands += 2
-        self.commands.append("{0} L {1} {2} {3}".format(self.id,warehouse.id,item_key,1))
-        self.commands.append("{0} D {1} {2} {3}".format(self.id,min_order.id,item_key,1))
+        for product, amount in job.products.iteritems():
+            total_commands += 1
+            self.commands.append("{0} L {1} {2} {3}".format(self.id,warehouse.id, product, amount))
+
+        for product, amount in job.products.iteritems():
+            total_commands += 1
+            self.commands.append("{0} D {1} {2} {3}".format(self.id, job.deliver_at, product, amount))
+
 
         self.turnsLeft = euclid(self.location, warehouse.location) + euclid(warehouse.location, min_order.location) + 2
         break
