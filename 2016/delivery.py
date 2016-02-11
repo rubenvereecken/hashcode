@@ -11,6 +11,15 @@ class Warehouse:
         self.location = location
         # Map product_id -> # products
         self.products = products
+
+    def __str__(self):
+        s = ''
+        s += 'location {}, contains {} products\n'.format(self.location, len(self.products))
+        s += str(self.products) + '\n'
+        # for product, amount in self.products.iteritems():
+        #     s += '{} -> {}\n'.format(product, amount)
+        return s
+            
         
 class Order:
     def __init__(self, location, items):
@@ -19,7 +28,12 @@ class Order:
         # Map product_id -> amount
         # To get all items as array: self.items.keys()
         # To get a key-value iterator: for k, v in self.items.iteritems()
-        self.items = {}
+        self.items = items
+
+    def __str__(self):
+        s = ''
+        s += 'order for {}, contains {} product types'.format(self.location, len(self.items.keys()))
+        return s
 
 if __name__ == '__main__':
     n_rows, n_cols, n_drones, n_turns, max_payload = read_ints()
@@ -46,11 +60,15 @@ if __name__ == '__main__':
         location = tuple(read_ints())
         n_items = int(raw_input())
         parsed_items = read_ints()
-        items = defaultdict(0)
+        items = defaultdict(int)
         for item in parsed_items:
             items[item] += 1
         order = Order(location, items)
+        orders.append(order)
 
+    # DOE DEES WEG 
+    for warehouse in warehouses: print warehouse
+    for order in orders: print order
 
 
 
