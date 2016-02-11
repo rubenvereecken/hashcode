@@ -61,27 +61,28 @@ class Order:
         # To get a key-value iterator: for k, v in self.items.iteritems()
         self.items = items
         self.id = _id
-<<<<<<< HEAD
         self.jobs = []
+        self.done = False
+        self.finalTurn = -1
 
-    def create_jobs(self, warehouse, partial):
-        jobs = []
-        print partial
-        while not partial.empty():
-            job = Job(warehouse, self.location)
-            for product, amount_wanted in partial.items.iteritems():
-                warehouse_has = warehouse.products[product]
-                taking = min(warehouse_has, amount_wanted)
-                taking = min(taking, job.left // product_types[product])
-                partial.items[product] -= taking
-                if taking > 0:
-                    job.products[product] = taking
-                    job.left -= taking * product_types[product]
-            # print partial
-            assert (job.left != job.capacity)
-            if jobs.left != job.capacity:
-                jobs.append(job)
-        self.jobs += jobs
+    # def create_jobs(self, warehouse, partial):
+    #     jobs = []
+    #     print partial
+    #     while not partial.empty():
+    #         job = Job(warehouse, self.location)
+    #         for product, amount_wanted in partial.items.iteritems():
+    #             warehouse_has = warehouse.products[product]
+    #             taking = min(warehouse_has, amount_wanted)
+    #             taking = min(taking, job.left // product_types[product])
+    #             partial.items[product] -= taking
+    #             if taking > 0:
+    #                 job.products[product] = taking
+    #                 job.left -= taking * product_types[product]
+    #         # print partial
+    #         assert (job.left != job.capacity)
+    #         if jobs.left != job.capacity:
+    #             jobs.append(job)
+    #     self.jobs += jobs
 
     def take_job(self):
         return self.jobs.pop()
@@ -91,10 +92,6 @@ class Order:
 
     def empty(self):
         return len(self.items) == 0 or np.all(self.items.values() == 0)
-=======
-        self.done = False
-        self.finalTurn = -1
->>>>>>> fc4f630378de3a11510c527c49cd4814e1ee786b
 
     def total_weight(self):
         return sum(map(lambda (product, amount) : amount * product_types[product], self.items.iteritems()))
@@ -132,14 +129,6 @@ for i in xrange(n_orders):
     order = Order(location, items, i)
     orders.append(order)
 
-<<<<<<< HEAD
-# TODO DOE DEES WEG
-for warehouse in warehouses: print(warehouse)
-for order in orders: print(order)
-
-
-=======
->>>>>>> fc4f630378de3a11510c527c49cd4814e1ee786b
 def euclid(a, b):
     if isinstance(a, tuple):
         a = np.array(a)
@@ -147,48 +136,48 @@ def euclid(a, b):
         b = np.array(b)
     return math.ceil(np.linalg.norm(b-a))
 
-def determine_orders():
-    # assume global
-    drone_location = warehouses[0].location
-    # robbed_warehouses = copy.deepcopy(warehouses)
-    warehouses_to_drones = np.array(map(lambda warehouse: euclid(warehouse.location, drone_location), warehouses))
-    orders_by_weight = sorted(orders, key=lambda order: order.total_weight())
-    weighted_orders = [None for _ in xrange(len(orders_by_weight))]
+# def determine_orders():
+#     # assume global
+#     drone_location = warehouses[0].location
+#     # robbed_warehouses = copy.deepcopy(warehouses)
+#     warehouses_to_drones = np.array(map(lambda warehouse: euclid(warehouse.location, drone_location), warehouses))
+#     orders_by_weight = sorted(orders, key=lambda order: order.total_weight())
+#     weighted_orders = [None for _ in xrange(len(orders_by_weight))]
 
-    for order_idx, order in enumerate(orders_by_weight):
-        # sorted by warehouse to order PLUS warehouse to drone start
-        warehouses.sort(key=lambda warehouse: euclid(warehouse.location, order.location) + euclid(warehouse.location, drone_location))
-        min_travel = 0
-        for warehouse_idx, warehouse in enumerate(warehouses):
-            if order.empty(): break
-            partial = {}
-            for product, amount_wanted in order.items.iteritems():
-                warehouse_has = warehouse.products[product]
-                taking = min(warehouse_has, amount_wanted)
-                order.items[product] -= taking
-                warehouse.products[product] -= taking
-                if taking > 0:
-                    partial[product] = taking
-                    min_travel += euclid(warehouse.location, order.location) + warehouses_to_drones[warehouse_idx]
-            partial_order = Order()
-            partial_order.items = partial
-            order.create_jobs(warehouse, partial_order)
+#     for order_idx, order in enumerate(orders_by_weight):
+#         # sorted by warehouse to order PLUS warehouse to drone start
+#         warehouses.sort(key=lambda warehouse: euclid(warehouse.location, order.location) + euclid(warehouse.location, drone_location))
+#         min_travel = 0
+#         for warehouse_idx, warehouse in enumerate(warehouses):
+#             if order.empty(): break
+#             partial = {}
+#             for product, amount_wanted in order.items.iteritems():
+#                 warehouse_has = warehouse.products[product]
+#                 taking = min(warehouse_has, amount_wanted)
+#                 order.items[product] -= taking
+#                 warehouse.products[product] -= taking
+#                 if taking > 0:
+#                     partial[product] = taking
+#                     min_travel += euclid(warehouse.location, order.location) + warehouses_to_drones[warehouse_idx]
+#             partial_order = Order()
+#             partial_order.items = partial
+#             order.create_jobs(warehouse, partial_order)
 
-        weighted_orders[order_idx] = (min_travel, order)
+#         weighted_orders[order_idx] = (min_travel, order)
 
-    weighted_orders.sort()
-    return list(map(lambda x: x[1], weighted_orders))
+#     weighted_orders.sort()
+#     return list(map(lambda x: x[1], weighted_orders))
 
-orders = determine_orders()
+# orders = determine_orders()
 
-def get_job():
-    if len(orders) == 0:
-        return None
-    # current = next(map(lambda order: order.has_jobs_left()))
-    current = orders[0]
-    if not current.has_jobs_left():
-        return get_job()
-    return current.take_job()
+# def get_job():
+#     if len(orders) == 0:
+#         return None
+#     # current = next(map(lambda order: order.has_jobs_left()))
+#     current = orders[0]
+#     if not current.has_jobs_left():
+#         return get_job()
+#     return current.take_job()
 
 
 class Drone(object):
