@@ -65,6 +65,8 @@ class Order:
 
     def create_jobs(self, warehouse, partial):
         jobs = []
+        print warehouse
+        print partial
         while not partial.empty():
             job = Job(warehouse, self.id)
             for product, amount_wanted in partial.items.iteritems():
@@ -76,6 +78,7 @@ class Order:
             assert (job.left != job.capacity)
             # if job.left != job.capacity:
             jobs.append(job)
+        print jobs
         self.jobs += jobs
 
     def take_job(self):
@@ -168,6 +171,8 @@ orders = determine_orders()
 
 # CALL THIS YE DRONES
 def get_job():
+    print 'HALLO'
+    print orders
     if len(orders) == 0:
         return None
     # current = next(map(lambda order: order.has_jobs_left()))
