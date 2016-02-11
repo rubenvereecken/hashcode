@@ -76,10 +76,58 @@ for i in xrange(n_orders):
 
 # DOE DEES WEG 
 for warehouse in warehouses: print warehouse
-for order in orders:
-    print order
-    print order.total_weight()
+for order in orders: print order
 
 
-# def determine_warehouse_order(warehouses):
+for a in range(n_drones):
+    drones.push(Drone());
 
+class Drone:
+    def __init__(self):
+        self.location = warehouses[0].location
+        self.turnsLeft = 0
+        self.action = None # "L" "D"
+        self.payload = {
+
+        }
+
+    def performAction():
+        pass
+
+    def calculateNewAction():
+        min_dist = 10000000
+        min_order = None
+        for order in orders:
+            dist = sqrt(self.location, order.location) #TODO
+            if dist < min_dist:
+                min_order = order
+                min_dist = dist
+
+        item_key = order.items.keys[0]
+        order.items[item_key] -= 1
+        if order.items[item_key] <= 0:
+            order.items.remove(item_key)
+
+        target_warehouse = None
+
+        for warehouse in warehouses:
+            if warehouse.products[item_key] > 0:
+                target_warehouse = warehouse
+                break
+
+        self.action = load target warehouse
+        self.next action = deliver order.location
+
+
+    def performTurn():
+        if self.turnsLeft = 0:
+            performAction()
+            calculateNewAction()
+
+        self.turnsLeft - 1;
+
+def main():
+    for a in range(n_turns):
+        for drone in drones:
+            drone.performTurn()
+>>>>>>> f6d82aa1161c12e0d6e6d49a5baa7666c2205204
