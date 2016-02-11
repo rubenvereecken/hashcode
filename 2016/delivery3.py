@@ -85,7 +85,7 @@ class Order:
         return self.jobs.pop()
 
     def has_jobs_left(self):
-        return len(self.job) > 0
+        return len(self.jobs) > 0
 
     def empty(self):
         return len(self.items) == 0 or np.all(np.array(self.items.values()) == 0)
@@ -194,37 +194,21 @@ class Drone(object):
         }
 
     def calculateNewAction(self):
+        global total_commands
+        job = get_job()
 
-        min_dist = 10000000
-        min_order = None
-        for order in orders:
-            if len(order.items.keys()) == 0:
-                continue
-            dist = euclid(self.location, order.location) #TODO
-            if dist < min_dist:
-                min_order = order
-                min_dist = dist
+        if job is None:
+            return
+        
+        for product, amount in job.products.iteritems():
+            total_commands += 1
+            self.commands.append("{0} L {1} {2} {3}".format(self.id,warehouse.id, product, amount))
+
+        for product, amount in job.products.iteritems():
+            total_commands += 1
+            self.commands.append("{0} D {1} {2} {3}".format(self.id, job.deliver_at, product, amount))
 
 
-        item_key = min_order.items.keys()[0]
-        min_order.items[item_key] -= 1
-        if min_order.items[item_key] <= 0:
-            del min_order.items[item_key]
-
-        target_warehouse = None
-
-        for warehouse in warehouses:
-            if warehouse.products[item_key] > 0:
-                target_warehouse = warehouse
-                warehouse.products[item_key] -= 1
-
-                global total_commands
-                total_commands += 2
-                self.commands.append("{0} L {1} {2} {3}".format(self.id,warehouse.id,item_key,1))
-                self.commands.append("{0} D {1} {2} {3}".format(self.id,min_order.id,item_key,1))
-
-                self.turnsLeft = euclid(self.location, warehouse.location) + euclid(warehouse.location, min_order.location) + 2
-                break
 
 
     def performTurn(self):
