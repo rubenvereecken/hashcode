@@ -66,7 +66,7 @@ class Order:
     def create_jobs(self, warehouse, partial):
         jobs = []
         while not partial.empty():
-            job = Job(warehouse, self.location)
+            job = Job(warehouse, self.location.id)
             for product, amount_wanted in partial.items.iteritems():
                 taking = min(amount_wanted, job.left // product_types[product])
                 partial.items[product] -= taking
@@ -166,6 +166,7 @@ def determine_orders():
 
 orders = determine_orders()
 
+# CALL THIS YE DRONES
 def get_job():
     if len(orders) == 0:
         return None
