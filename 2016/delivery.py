@@ -83,7 +83,7 @@ def euclid(a, b):
         a = np.array(a)
     if isinstance(b, tuple):
         b = np.array(b)
-    return np.linalg.norm(b-a)
+    return math.ceil(np.linalg.norm(b-a))
 
 def determine_warehouse_order():
     # assume global
@@ -130,10 +130,11 @@ class Drone:
             if warehouse.products[item_key] > 0:
                 target_warehouse = warehouse
                 warehouse.products[item_key] -= 1
+
                 total_commands += 2
                 drones.commands.push("{0} L {1} {2} {3}".format(drone.id,warehouse.id,product_type,1))
-                drones.commands.push("{0} D {1} {2} {3}".format(drone.id,min_order.id,product_type,1)
-                self.turnsLeft = euclid(drone.location, warehouse.location) + 2
+                drones.commands.push("{0} D {1} {2} {3}".format(drone.id,min_order.id,product_type,1))
+                self.turnsLeft = euclid(self.location, warehouse.location) + euclid(warehouse.location, min_order.location) + 2
                 break
 
 
