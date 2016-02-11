@@ -137,12 +137,19 @@ class Drone(object):
                 target_warehouse = warehouse
                 warehouse.products[item_key] -= 1
 
+
+                self.turnsLeft = euclid(self.location, warehouse.location) + euclid(warehouse.location, min_order.location) + 2
+
+                min_order.finalTurn = max(order.finalTurn, self.turnsLeft + turn)
+
+                if min_order.finalTurn >= n_turns-1:
+                    continue
+
                 total_commands += 2
                 self.commands.append("{0} L {1} {2} {3}".format(self.id,warehouse.id,item_key,1))
                 self.commands.append("{0} D {1} {2} {3}".format(self.id,min_order.id,item_key,1))
 
-                self.turnsLeft = euclid(self.location, warehouse.location) + euclid(warehouse.location, min_order.location) + 2
-                min_order.finalTurn = max(order.finalTurn, self.turnsLeft + turn)
+
                 break
 
 
@@ -165,10 +172,11 @@ def main():
     for order in orders:
         #print(order.finalTurn)
         if (order.finalTurn != -1):
+            #print(order.finalTurn)
             score += (n_turns - order.finalTurn)/n_turns
 
-    print("score:")
-    print(score*100)
+    #print("score:")
+    #print(score*100)
 
     # output
     print(total_commands)
