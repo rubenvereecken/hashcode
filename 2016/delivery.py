@@ -120,6 +120,8 @@ class Drone(object):
                 min_order = order
                 min_dist = dist
 
+        if min_order is None:
+            return
 
         item_key = min_order.items.keys()[0]
         min_order.items[item_key] -= 1
@@ -148,7 +150,7 @@ class Drone(object):
         if self.turnsLeft == 0:
             self.calculateNewAction(turn)
 
-        self.turnsLeft - 1;
+        self.turnsLeft -= 1;
 
 for i in range(n_drones):
     drones.append(Drone(i));
@@ -158,10 +160,6 @@ def main():
     for turn in range(n_turns):
         for drone in drones:
             drone.performTurn(turn)
-        for order in orders:
-            if not order.done:
-                break
-            break
 
     score = 0
     for order in orders:
