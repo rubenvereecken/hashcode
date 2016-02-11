@@ -138,8 +138,8 @@ class Drone:
                 warehouse.products[item_key] -= 1
 
                 total_commands += 2
-                self.commands.append("{0} L {1} {2} {3}".format(self.id,warehouse.id,product_type,1))
-                self.commands.append("{0} D {1} {2} {3}".format(self.id,min_order.id,product_type,1))
+                self.commands.append("{0} L {1} {2} {3}".format(self.id,warehouse.id,item_key,1))
+                self.commands.append("{0} D {1} {2} {3}".format(self.id,min_order.id,item_key,1))
 
                 self.turnsLeft = euclid(self.location, warehouse.location) + euclid(warehouse.location, min_order.location) + 2
                 break
