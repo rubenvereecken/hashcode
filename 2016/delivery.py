@@ -27,7 +27,16 @@ class Warehouse:
         s += str(self.products) + '\n'
         return s
 
+    def __contains__(self, item):
+        return self.products[item] > 0
 
+    def contains_enough_of(self, item, amount):
+        return self.products[item] >= amount
+
+    def remove_products(self, item, amount):
+        self.products[item] -= amount
+
+        
 class Order:
     def __init__(self, location, items):
         # python tuple r, c
@@ -88,11 +97,33 @@ def euclid(a, b):
 def determine_warehouse_order():
     # assume global
     drone_location = warehouses[0].location
-    warehouses_to_drones = np.array(map(lambda warehouse: euclid(warehouse.location, drone_location)), warehouses)
+    # robbed_warehouses = copy.deepcopy(warehouses)
+    # warehouses_to_drones = np.array(map(lambda warehouse: euclid(warehouse.location, drone_location)), warehouses)
 
-    # orders_by_weight = orders.sort(key=lambda order: )
-    for order in orders:
-        pass
+    orders_by_weight = sorted(orders, key=lambda order: order.total_weight())
+    weighted_orders = np.empty(len(orders))
+    for order_idx, order in enumerate(orders_by_weight):
+        # sorted by warehouse to order PLUS warehouse to drone start
+        warehouses.sort(key=lambda warehouse: euclid(warehouse.location, order.location) + euclid(warehouse.location, drone_location))
+        used_warehouses = []
+        min_travel = 0
+        for warehouse_idx, warehouse in enumerate(warehouses):
+            if len(order.items) == 0: break
+            for product, amount_wanted in order.items.iteritems():
+                warehouse_has = warehouse.products[product]
+                taking = min(warehouse_has, amount_wanted)
+                order.items[product] -= taking
+                warehouse.products[product] -= taking
+                if taking == amount_wanted:
+                    del order.items[product]
+                if taking > 0:
+                    min_travel += euclid(warehouse.location, order.location)
+        weighted_orders[order_idx] = (min_travel, order)
+
+    weighted_orders.sort()
+    return weighted_orders
+
+
 
 for _ in range(n_drones):
     drones.push(Drone());
