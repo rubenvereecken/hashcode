@@ -16,8 +16,6 @@ class Warehouse:
         s = ''
         s += 'location {}, contains {} products\n'.format(self.location, len(self.products))
         s += str(self.products) + '\n'
-        # for product, amount in self.products.iteritems():
-        #     s += '{} -> {}\n'.format(product, amount)
         return s
             
         
@@ -27,12 +25,13 @@ class Order:
         self.location = location
         # Map product_id -> amount
         # To get all items as array: self.items.keys()
+        # To get all values: self.items.values()
         # To get a key-value iterator: for k, v in self.items.iteritems()
         self.items = items
 
     def __str__(self):
         s = ''
-        s += 'order for {}, contains {} product types'.format(self.location, len(self.items.keys()))
+        s += 'order for {}, contains {} product types, total of {} products'.format(self.location, len(self.items.keys()), sum(self.items.values()))
         return s
 
 if __name__ == '__main__':
