@@ -206,9 +206,6 @@ class Drone(object):
             total_commands += 1
             self.commands.append("{0} D {1} {2} {3}".format(self.id, job.deliver_at, product, amount))
 
-
-
-
     def performTurn(self):
         if self.turnsLeft == 0:
             self.calculateNewAction()
@@ -226,7 +223,7 @@ def main():
     # output
     print(total_commands)
     for drone in drones:
-        "\n".join(drone.commands)
+        print("\n".join(drone.commands))
 
 
 main()
