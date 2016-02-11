@@ -66,7 +66,7 @@ class Order:
     def create_jobs(self, warehouse, partial):
         jobs = []
         while not partial.empty():
-            job = Job(warehouse, self.location.id)
+            job = Job(warehouse, self.id)
             for product, amount_wanted in partial.items.iteritems():
                 taking = min(amount_wanted, job.left // product_types[product])
                 partial.items[product] -= taking
