@@ -61,6 +61,7 @@ class Order:
         # To get a key-value iterator: for k, v in self.items.iteritems()
         self.items = items
         self.id = _id
+<<<<<<< HEAD
         self.jobs = []
 
     def create_jobs(self, warehouse, partial):
@@ -90,6 +91,10 @@ class Order:
 
     def empty(self):
         return len(self.items) == 0 or np.all(self.items.values() == 0)
+=======
+        self.done = False
+        self.finalTurn = -1
+>>>>>>> fc4f630378de3a11510c527c49cd4814e1ee786b
 
     def total_weight(self):
         return sum(map(lambda (product, amount) : amount * product_types[product], self.items.iteritems()))
@@ -127,11 +132,14 @@ for i in xrange(n_orders):
     order = Order(location, items, i)
     orders.append(order)
 
+<<<<<<< HEAD
 # TODO DOE DEES WEG
 for warehouse in warehouses: print(warehouse)
 for order in orders: print(order)
 
 
+=======
+>>>>>>> fc4f630378de3a11510c527c49cd4814e1ee786b
 def euclid(a, b):
     if isinstance(a, tuple):
         a = np.array(a)
@@ -193,23 +201,28 @@ class Drone(object):
 
         }
 
-    def calculateNewAction(self):
+    def calculateNewAction(self,turn):
+        global total_commands
 
         min_dist = 10000000
         min_order = None
         for order in orders:
-            if len(order.items.keys()) == 0:
+            if order.done:
                 continue
             dist = euclid(self.location, order.location) #TODO
             if dist < min_dist:
                 min_order = order
                 min_dist = dist
 
+        if min_order is None:
+            return
 
         item_key = min_order.items.keys()[0]
         min_order.items[item_key] -= 1
         if min_order.items[item_key] <= 0:
             del min_order.items[item_key]
+        if len(min_order.items.keys()) == 0:
+            min_order.done = True
 
         target_warehouse = None
 
@@ -218,33 +231,51 @@ class Drone(object):
                 target_warehouse = warehouse
                 warehouse.products[item_key] -= 1
 
-                global total_commands
+
+                self.turnsLeft = euclid(self.location, warehouse.location) + euclid(warehouse.location, min_order.location) + 2
+
+                min_order.finalTurn = max(order.finalTurn, self.turnsLeft + turn)
+
+                if min_order.finalTurn >= n_turns-1:
+                    continue
+
                 total_commands += 2
                 self.commands.append("{0} L {1} {2} {3}".format(self.id,warehouse.id,item_key,1))
                 self.commands.append("{0} D {1} {2} {3}".format(self.id,min_order.id,item_key,1))
 
-                self.turnsLeft = euclid(self.location, warehouse.location) + euclid(warehouse.location, min_order.location) + 2
+
                 break
 
 
-    def performTurn(self):
+    def performTurn(self,turn):
         if self.turnsLeft == 0:
-            self.calculateNewAction()
+            self.calculateNewAction(turn)
 
-        self.turnsLeft - 1;
+        self.turnsLeft -= 1;
 
 for i in range(n_drones):
     drones.append(Drone(i));
 
 
 def main():
-    for a in range(n_turns):
+    for turn in range(n_turns):
         for drone in drones:
-            drone.performTurn()
+            drone.performTurn(turn)
+
+    score = 0
+    for order in orders:
+        #print(order.finalTurn)
+        if (order.finalTurn != -1):
+            #print(order.finalTurn)
+            score += (n_turns - order.finalTurn)/n_turns
+
+    #print("score:")
+    #print(score*100)
+
     # output
     print(total_commands)
     for drone in drones:
-        "\n".join(drone.commands)
+        print("\n".join(drone.commands))
 
 
 main()
