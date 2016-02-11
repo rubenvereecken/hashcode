@@ -38,6 +38,9 @@ class Order:
         # To get a key-value iterator: for k, v in self.items.iteritems()
         self.items = items
 
+    def total_weight(self):
+        return sum(map(lambda (product, amount): amount * product_types[product], self.items.iteritems()))
+
     def __str__(self):
         s = ''
         s += 'order for {}, contains {} product types, total of {} products'.format(self.location, len(self.items.keys()), sum(self.items.values()))
@@ -75,8 +78,7 @@ for i in xrange(n_orders):
 for warehouse in warehouses: print warehouse
 for order in orders: print order
 
-
-for a in range(n_drones):
+for _ in range(n_drones):
     drones.push(Drone());
 
 class Drone:
