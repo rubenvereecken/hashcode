@@ -74,3 +74,27 @@ for i in xrange(n_orders):
 # DOE DEES WEG 
 for warehouse in warehouses: print warehouse
 for order in orders: print order
+
+
+drones = [];
+
+class Drone:
+    def __init__(self):
+        self.pos = (0,0);
+        self.turnsLeft = 0
+        self.action = "" #LOAD...
+        self.payloads = []
+
+    def perform
+
+    def performTurn():
+        if self.turnsLeft = 0:
+            performAction()
+            calculateNewAction()
+
+        self.turnsLeft - 1;
+
+def main():
+    for a in range(turns):
+        for drone in drones:
+            drone.performTurn()
