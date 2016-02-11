@@ -56,6 +56,10 @@ class Square(Move):
     def __str__(self):
         return 'PAINT_SQUARE {} {} {}'.format(self.center[0], self.center[1], self.radius)
 
+    def __contains__(self, cell):
+        return self.center[0] - self.radius <= cell[0] <= self.center[0] + self.radius \
+           and self.center[1] - self.radius <= cell[1] <= self.center[1] + self.radius
+
 class Line(Move):
     def __init__(self, start, to):
         # assert(start[0] == to[0] or start[1] == to[1])
@@ -166,11 +170,13 @@ class State():
         bottomright = copy.deepcopy(topleft)
         margin = np.min(np.array([n_rows, n_cols]) - topleft) - 1
 
-        for step in range(2, margin):
+        for step in range(2, margin, 2):
             # every step, investigate growing the square. If that has too many holes, 
             # go with the smaller one
             for r in range(topleft[0], bottomright[0]+3):
                 for c in range(bottomright[1]+1, bottomright[1]+3):
+                    if c == 800:
+                        print topleft, bottomright, margin, step
                     should_paint = positive[r,c]
                     already_painted = canvas[r,c]
                     if not (should_paint or already_painted):
@@ -211,6 +217,10 @@ class State():
         max_fresh = 1 # Have at least one newly painted cell
         for r in range(n_rows):
             for c in range(n_cols):
+                # TODO little heuristic, might have to remove
+                # If it's already in a known square, don't recheck
+                # if np.any(map(lambda square: (r,c) in square, squares)):
+                #     continue
                 square, fresh = self.find_square_at((r, c), self.canvas, positive)
                 if fresh > max_fresh:
                     max_fresh = fresh
