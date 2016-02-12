@@ -65,8 +65,6 @@ class Order:
 
     def create_jobs(self, warehouse, partial):
         jobs = []
-        print warehouse
-        print partial
         while not partial.empty():
             job = Job(warehouse, self.id)
             for product, amount_wanted in partial.items.iteritems():
@@ -78,7 +76,6 @@ class Order:
             assert (job.left != job.capacity)
             # if job.left != job.capacity:
             jobs.append(job)
-        print jobs
         self.jobs += jobs
 
     def take_job(self):
@@ -139,7 +136,7 @@ def determine_orders():
     drone_location = warehouses[0].location
     warehouses_to_drones = np.array(map(lambda warehouse: euclid(warehouse.location, drone_location), warehouses))
     orders_by_weight = sorted(orders, key=lambda order: order.total_weight())
-    weighted_orders = [None for _ in xrange(len(orders_by_weight))]
+    weighted_orders = []
     broken_warehouses = copy.deepcopy(warehouses)
 
 
@@ -147,25 +144,34 @@ def determine_orders():
         # sorted by warehouse to order PLUS warehouse to drone start
         broken_warehouses.sort(key=lambda warehouse: euclid(warehouse.location, order.location) + euclid(warehouse.location, drone_location))
         min_travel = 0
+        partials = []
         for warehouse_idx, warehouse in enumerate(broken_warehouses):
             if order.empty(): break
             partial = {}
             for product, amount_wanted in order.items.iteritems():
                 warehouse_has = warehouse.products[product]
+                # By taking the minimum of what the warehouse has to offer and
+                # what you want, you can never take too much
                 taking = min(warehouse_has, amount_wanted)
                 order.items[product] -= taking
                 warehouse.products[product] -= taking
                 if taking > 0:
                     partial[product] = taking
-                    min_travel += (euclid(warehouse.location, order.location) + warehouses_to_drones[warehouse_idx]) * order.total_weight()
+                    min_travel += (euclid(warehouse.location, order.location) + warehouses_to_drones[warehouse_idx])
             partial_order = Order()
             partial_order.items = partial
-            order.create_jobs(warehouse, partial_order)
+            partials.append(partial_order)
+            # TODO only create jobs if you're sure an order can be fulfilled
 
-        weighted_orders[order_idx] = (min_travel, order)
+        # If managed to complete the order, create jobs for it
+        # If order cannot be completed, don't even bother
+        if order.empty():
+            for partial_order in partials:
+                order.create_jobs(warehouse, partial_order)
+            weighted_orders.append((min_travel, order))
 
     weighted_orders.sort()
-    print weighted_orders
+    # Extract only the orders, don't care for the weights
     return list(map(lambda x: x[1], weighted_orders))
 
 # CALL THIS YE DRONES
