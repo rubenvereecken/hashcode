@@ -50,7 +50,7 @@ class Warehouse:
     def remove_products(self, item, amount):
         self.products[item] -= amount
 
-        
+
 class Order:
     def __init__(self, location=None, items=None, _id=None):
         # python tuple r, c
@@ -203,7 +203,7 @@ class Drone(object):
 
         if job is None:
             return
-        
+
         for product, amount in job.products.iteritems():
             total_commands += 1
             self.commands.append("{0} L {1} {2} {3}".format(self.id,warehouse.id, product, amount))
@@ -221,6 +221,7 @@ class Drone(object):
 for i in range(n_drones):
     drones.append(Drone(i));
 
+order = determine_orders()
 
 def main():
     for a in range(n_turns):
