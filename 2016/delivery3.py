@@ -59,7 +59,7 @@ class Order:
         # To get all items as array: self.items.keys()
         # To get all values: self.items.values()
         # To get a key-value iterator: for k, v in self.items.iteritems()
-        self.items = items
+        self.products = items
         self.id = _id
         self.jobs = []
 
@@ -67,9 +67,9 @@ class Order:
         jobs = []
         while not partial.empty():
             job = Job(warehouse, self.id)
-            for product, amount_wanted in partial.items.iteritems():
+            for product, amount_wanted in partial.products.iteritems():
                 taking = min(amount_wanted, job.left // product_types[product])
-                partial.items[product] -= taking
+                partial.products[product] -= taking
                 if taking > 0:
                     job.products[product] = taking
                     job.left -= taking * product_types[product]
@@ -85,14 +85,14 @@ class Order:
         return len(self.jobs) > 0
 
     def empty(self):
-        return len(self.items) == 0 or np.all(np.array(self.items.values()) == 0)
+        return len(self.products) == 0 or np.all(np.array(self.products.values()) == 0)
 
     def total_weight(self):
-        return sum(map(lambda (product, amount) : amount * product_types[product], self.items.iteritems()))
+        return sum(map(lambda (product, amount) : amount * product_types[product], self.products.iteritems()))
 
     def __str__(self):
         s = ''
-        s += 'order for {}, contains {} product types, total of {} products'.format(self.location, len(self.items.keys()), sum(self.items.values()))
+        s += 'order for {}, contains {} product types, total of {} products'.format(self.location, len(self.products.keys()), sum(self.products.values()))
         return s
 
 ### MAIN - parse everything into globals ###
@@ -117,10 +117,10 @@ for i in xrange(n_orders):
     location = tuple(read_ints())
     n_items = int(raw_input())
     parsed_items = read_ints()
-    items = defaultdict(int)
+    products = defaultdict(int)
     for item in parsed_items:
-        items[item] += 1
-    order = Order(location, items, i)
+        products[item] += 1
+    order = Order(location, products, i)
     orders.append(order)
 
 
@@ -148,18 +148,18 @@ def determine_orders():
         for warehouse_idx, warehouse in enumerate(broken_warehouses):
             if order.empty(): break
             partial = {}
-            for product, amount_wanted in order.items.iteritems():
+            for product, amount_wanted in order.products.iteritems():
                 warehouse_has = warehouse.products[product]
                 # By taking the minimum of what the warehouse has to offer and
                 # what you want, you can never take too much
                 taking = min(warehouse_has, amount_wanted)
-                order.items[product] -= taking
-                warehouse.products[product] -= taking
                 if taking > 0:
                     partial[product] = taking
                     min_travel += (euclid(warehouse.location, order.location) + warehouses_to_drones[warehouse_idx])
+                    order.products[product] -= taking
+                    warehouse.products[product] -= taking
             partial_order = Order()
-            partial_order.items = partial
+            partial_order.products = partial
             partials.append(partial_order)
             # TODO only create jobs if you're sure an order can be fulfilled
 
@@ -169,6 +169,11 @@ def determine_orders():
             for partial_order in partials:
                 order.create_jobs(warehouse, partial_order)
             weighted_orders.append((min_travel, order))
+        else:
+            for partial_order in partials:
+                for prod in partial_order.products:
+                    partial_order.warehouse.products[prod] += partial_order.products[prod]
+                    order.products[prod] += partial_order.products[prod]
 
     weighted_orders.sort()
     # Extract only the orders, don't care for the weights
@@ -176,7 +181,6 @@ def determine_orders():
 
 # CALL THIS YE DRONES
 def get_job():
-    print orders
     if len(orders) == 0:
         return None
     # current = next(map(lambda order: order.has_jobs_left()))
@@ -206,7 +210,7 @@ class Drone(object):
 
         for product, amount in job.products.iteritems():
             total_commands += 1
-            self.commands.append("{0} L {1} {2} {3}".format(self.id,warehouse.id, product, amount))
+            self.commands.append("{0} L {1} {2} {3}".format(self.id,job.warehouse.id, product, amount))
 
         for product, amount in job.products.iteritems():
             total_commands += 1
