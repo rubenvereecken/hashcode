@@ -150,30 +150,28 @@ def determine_orders():
             partial = {}
             for product, amount_wanted in order.products.iteritems():
                 warehouse_has = warehouse.products[product]
+                assert(warehouse_has >= 0)
+                if warehouse_has == 0 or amount_wanted == 0:
+                    continue
                 # By taking the minimum of what the warehouse has to offer and
                 # what you want, you can never take too much
                 taking = min(warehouse_has, amount_wanted)
-                if taking > 0:
-                    partial[product] = taking
-                    min_travel += (euclid(warehouse.location, order.location) + warehouses_to_drones[warehouse_idx])
-                    order.products[product] -= taking
-                    warehouse.products[product] -= taking
+                assert(taking > 0)
+                partial[product] = taking
+                min_travel += (euclid(warehouse.location, order.location) + warehouses_to_drones[warehouse_idx])
+                order.products[product] -= taking
+                warehouse.products[product] -= taking
             partial_order = Order()
             partial_order.products = partial
-            partials.append(partial_order)
-            # TODO only create jobs if you're sure an order can be fulfilled
+            partials.append((warehouse,partial_order))
+
 
         # If managed to complete the order, create jobs for it
         # If order cannot be completed, don't even bother
         if order.empty():
-            for partial_order in partials:
-                order.create_jobs(warehouse, partial_order)
+            for part in partials:
+                order.create_jobs(*part)
             weighted_orders.append((min_travel, order))
-        else:
-            for partial_order in partials:
-                for prod in partial_order.products:
-                    partial_order.warehouse.products[prod] += partial_order.products[prod]
-                    order.products[prod] += partial_order.products[prod]
 
     weighted_orders.sort()
     # Extract only the orders, don't care for the weights
